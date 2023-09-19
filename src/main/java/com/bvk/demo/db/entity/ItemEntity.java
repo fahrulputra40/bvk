@@ -1,10 +1,12 @@
 package com.bvk.demo.db.entity;
 
 import lombok.Data;
+import lombok.ToString;
 
 import javax.persistence.*;
 
-@Entity(name = "item")
+@Entity
+@Table(name = "tb_item")
 @Data
 public class ItemEntity {
 

@@ -1,10 +1,11 @@
 package com.bvk.demo.controller;
 
-import com.bvk.demo.controller.request.ItemRequest;
-import com.bvk.demo.controller.response.BaseResponse;
-import com.bvk.demo.controller.response.ItemResponse;
+import com.bvk.demo.model.request.ItemRequest;
+import com.bvk.demo.model.response.BaseResponse;
+import com.bvk.demo.model.response.ItemResponse;
 import com.bvk.demo.db.entity.ItemEntity;
 import com.bvk.demo.db.repository.ItemRepository;
+import com.bvk.demo.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,40 +19,23 @@ import java.util.stream.Collectors;
 @RequestMapping("item")
 @RequiredArgsConstructor
 public class ItemController {
-
-    private final ItemRepository itemRepository;
-
+    private final ItemService itemService;
     @PostMapping
     public ResponseEntity<BaseResponse> createItem(@RequestBody ItemRequest itemRequest){
-        ItemEntity itemEntity = itemRequest;
-        itemEntity.setId("");
-        itemRepository.save(itemEntity);
-        return new ResponseEntity<>(BaseResponse.responseSuccess(), HttpStatus.CREATED);
+        return new ResponseEntity<>(BaseResponse.composeBaseResponse(itemService.createItem(itemRequest)), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<List<ItemResponse>>> getItems(){
-        BaseResponse<List<ItemResponse>> itemResponse = new BaseResponse<>();
-        itemResponse.setData(itemRepository.findAll().stream().map(d->(ItemResponse)d).collect(Collectors.toList()));
-        return ResponseEntity.ok(itemResponse);
+    public ResponseEntity<BaseResponse<List<ItemResponse>>> getItems(@RequestParam(value = "itemId", defaultValue = "") String itemId,
+                                                                     @RequestParam(value = "itemName", defaultValue = "") String itemName){
+        return ResponseEntity.ok(BaseResponse.composeBaseResponse(itemService.getItems(itemId, itemName)));
     }
-
-    @GetMapping("/{itemId}")
-    public ResponseEntity<BaseResponse<ItemResponse>> getItem(@RequestParam("itemId") String itemId){
-        BaseResponse<ItemResponse> itemResponseBaseResponse = new BaseResponse<>();
-        Optional<ItemEntity> itemEntity = itemRepository.findById(itemId);
-        if(itemEntity.isEmpty()){
-            BaseResponse.ErrorResponse errorResponse = new BaseResponse.ErrorResponse();
-            errorResponse.setReason("Item tidak tersedia");
-            itemResponseBaseResponse.setError(errorResponse);
-        }else
-            itemResponseBaseResponse.setData((ItemResponse)itemEntity.get());
-        return ResponseEntity.ok(itemResponseBaseResponse);
+    @PutMapping("/{itemId}")
+    ResponseEntity<BaseResponse> updateItem(@RequestBody ItemRequest itemRequest, @PathVariable String itemId){
+        return ResponseEntity.ok(BaseResponse.composeBaseResponse(itemService.updateItem(itemId, itemRequest)));
     }
-
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<BaseResponse> deleteItem(@RequestParam("itemId") String itemId){
-        itemRepository.deleteById(itemId);
-        return ResponseEntity.ok(BaseResponse.responseSuccess());
+    public ResponseEntity<BaseResponse> deleteItem(@PathVariable("itemId") String itemId){
+        return ResponseEntity.ok(BaseResponse.composeBaseResponse(itemService.deleteItem(itemId)));
     }
 }

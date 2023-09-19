@@ -1,4 +1,4 @@
-package com.bvk.demo.controller.response;
+package com.bvk.demo.model.response;
 
 import lombok.Data;
 
@@ -6,11 +6,15 @@ import lombok.Data;
 public class BaseResponse <T>{
     private T data;
     private ErrorResponse error;
-    public static BaseResponse responseSuccess(){
-        BaseResponse<SuccessResponse> baseResponse = new BaseResponse<>();
+    public static SuccessResponse responseSuccess(){
         SuccessResponse successResponse = new SuccessResponse();
         successResponse.setStatus("success");
-        baseResponse.setData(successResponse);
+        return successResponse;
+    }
+
+    public static <T> BaseResponse composeBaseResponse(T data){
+        BaseResponse<T> baseResponse = new BaseResponse<>();
+        baseResponse.setData(data);
         return baseResponse;
     }
     @Data
