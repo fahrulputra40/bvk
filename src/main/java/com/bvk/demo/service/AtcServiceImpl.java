@@ -47,7 +47,12 @@ public class AtcServiceImpl implements AtcService{
         Optional<CartEntity> optionalCartEntity = cartRepository.findById(cartId);
         if(optionalCartEntity.isEmpty()) throw new ServiceException("Cart tidak tersedia");
         CartEntity cart = optionalCartEntity.get();
-        cart.setItemEntity(itemEntities);
+        List<String> cartItemIds = cart.getItemEntity().stream().map(ItemEntity::getId).collect(Collectors.toList());
+        for (ItemEntity itemEntity: itemEntities){
+            if(!cartItemIds.contains(itemEntity.getId())){
+                cart.getItemEntity().add(itemEntity);
+            }
+        }
         cartRepository.save(cart);
         return BaseResponse.responseSuccess();
     }
@@ -79,7 +84,11 @@ public class AtcServiceImpl implements AtcService{
     @Override
     @Transactional
     public BaseResponse.SuccessResponse removeCart(String cartId) {
-        cartRepository.deleteById(cartId);
+        try{
+            cartRepository.deleteById(cartId);
+        }catch (Exception e){
+            new ServiceException("Cart tidak tersedia");
+        }
         return BaseResponse.responseSuccess();
     }
 

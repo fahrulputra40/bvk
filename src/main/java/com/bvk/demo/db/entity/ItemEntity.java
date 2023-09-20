@@ -1,7 +1,6 @@
 package com.bvk.demo.db.entity;
 
 import lombok.Data;
-import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -14,5 +13,5 @@ public class ItemEntity {
     private String id;
     private String name;
     private String detail;
-    private double price;
+    private Double price;
 }
